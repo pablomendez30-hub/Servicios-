@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spa Citas</title>
+</head>
+<body>
+    <h1>Servicios Disponibles</h1>
+    <ul id="servicios"></ul>
+
+    <h2>Solicitar Cita</h2>
+    <form id="citaForm">
+        <input type="text" id="usuario_id" placeholder="ID Usuario" required />
+        <select id="servicio"></select>
+        <input type="date" id="fecha" required />
+        <input type="time" id="hora" required />
+        <button type="submit">Reservar</button>
+    </form>
+
+    <script>
+        // Cargar servicios
+        fetch('http://localhost:3000/servicios')
+            .then(res => res.json())
+            .then(data => {
+                const serviciosList = document.getElementById('servicios');
+                const servicioSelect = document.getElementById('servicio');
+                data.forEach(servicio => {
+                    const li = document.createElement('li');
+                    li.textContent = `${servicio.nombre} - $${servicio.precio}`;
+                    serviciosList.appendChild(li);
+
+                    const option = document.createElement('option');
+                    option.value = servicio.id;
+                    option.textContent = servicio.nombre;
+                    servicioSelect.appendChild(option);
+                });
+            });
+
+        // Reservar cita
+        document.getElementById('citaForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usuario_id = document.getElementById('usuario_id').value;
+            const servicio = document.getElementById('servicio').value;
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+
+            fetch('http://localhost:3000/citas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id, servicio_id: servicio, fecha, hora })
+            })
+            .then(res => res.json())
+            .then(data => alert(data.mensaje));
+        });
+    </script>
+</body>
+</html>
