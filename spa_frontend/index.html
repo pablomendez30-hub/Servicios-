@@ -3,56 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spa Citas</title>
+    <title>Spa Gestión - Booksy Style</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Servicios Disponibles</h1>
-    <ul id="servicios"></ul>
+    <!-- Header con Logo y Navegación -->
+    <header>
+        <div class="logo-contenedor">
+            <img src="logo.png" alt="Logo del Spa" class="logo">
+            <h1>Spa Gestión</h1>
+        </div>
+        <nav>
+            <button onclick="mostrarSeccion('inicio')">Inicio</button>
+            <button onclick="mostrarSeccion('agregar')">Agregar Servicios</button>
+			<button onclick="mostrarSeccion('Servicios')">Inicio</button>
+        </nav>
+    </header>
 
-    <h2>Solicitar Cita</h2>
-    <form id="citaForm">
-        <input type="text" id="usuario_id" placeholder="ID Usuario" required />
-        <select id="servicio"></select>
-        <input type="date" id="fecha" required />
-        <input type="time" id="hora" required />
-        <button type="submit">Reservar</button>
-    </form>
+    <!-- Contenido Principal -->
+    <main>
+        <!-- Pantalla de Inicio -->
+        <section id="seccion-inicio" class="seccion">
+            <div class="hero">
+                <h2>Bienvenido a Spa Gestión</h2>
+                <p>Descubre los mejores servicios para tu bienestar</p>
+                <button onclick="scrollToServicios()">Explorar Servicios</button>
+            </div>
+            <div id="serviciosInicio" class="servicios-contenedor"></div>
+        </section>
 
+        <!-- Formulario para Agregar Servicios -->
+        <section id="seccion-agregar" class="seccion" style="display: none;">
+            <h2>Agregar Nuevo Servicio</h2>
+            <form id="formAgregarServicio">
+                <input type="text" id="nombre" placeholder="Nombre del servicio" required />
+                <textarea id="descripcion" placeholder="Descripción del servicio" required></textarea>
+                <input type="number" id="precio" placeholder="Precio" required />
+                <button type="submit">Guardar Servicio</button>
+            </form>
+            <button onclick="mostrarSeccion('inicio')" class="volver">Volver al Inicio</button>
+        </section>
+
+        <!-- Formulario para Solicitar Cita -->
+        <section id="seccion-cita" class="seccion" style="display: none;">
+            <h2>Solicitar Cita</h2>
+            <form id="formCita">
+                <input type="text" id="nombreCliente" placeholder="Nombre" required />
+                <input type="text" id="apellidoCliente" placeholder="Apellido" required />
+                <input type="text" id="telefonoCliente" placeholder="Teléfono" required />
+                <input type="datetime-local" id="horaCita" required />
+                <button type="submit">Solicitar Cita</button>
+            </form>
+            <button onclick="mostrarSeccion('inicio')" class="volver">Volver al Inicio</button>
+        </section>
+    </main>
+
+    <!-- Script -->
     <script>
-        // Cargar servicios
-        fetch('http://localhost:3000/servicios')
-            .then(res => res.json())
-            .then(data => {
-                const serviciosList = document.getElementById('servicios');
-                const servicioSelect = document.getElementById('servicio');
-                data.forEach(servicio => {
-                    const li = document.createElement('li');
-                    li.textContent = `${servicio.nombre} - $${servicio.precio}`;
-                    serviciosList.appendChild(li);
+        let servicioSeleccionado = null;
 
-                    const option = document.createElement('option');
-                    option.value = servicio.id;
-                    option.textContent = servicio.nombre;
-                    servicioSelect.appendChild(option);
-                });
-            });
+        // Mostrar u ocultar secciones dinámicamente
+        function mostrarSeccion(seccion) {
+            document.querySelectorAll('.seccion').forEach(s => s.style.display = 'none');
+            document.getElementById(`seccion-${seccion}`).style.display = 'block';
+            if (seccion === 'inicio') cargarServiciosInicio();
+        }
 
-        // Reservar cita
-        document.getElementById('citaForm').addEventListener('submit', (e) => {
+        // Cargar servicios en la pantalla de inicio
+        function cargarServiciosInicio() {
+            fetch('https://servicios-vpcf.onrender.com')
+                .then(res => res.json())
+                .then(data => {
+                    const contenedor = document.getElementById('serviciosInicio');
+                    contenedor.innerHTML = '';
+                    data.forEach(servicio => {
+                        const div = document.createElement('div');
+                        div.className = 'servicio';
+                        div.innerHTML = `
+                            <h3>${servicio.nombre}</h3>
+                            <p>${servicio.descripcion}</p>
+                            <p><strong>Precio:</strong> $${servicio.precio}</p>
+                            <button onclick="seleccionarServicio(${servicio.id})">Solicitar Cita</button>
+                        `;
+                        contenedor.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error al cargar los servicios:', error));
+        }
+# Exported from Render on 2024-12-12T11:26:36Z
+services:
+- type: web
+  name: C:\Users\pmendezv\Desktop\Proyecto desarrollo\Servicios
+  runtime: go
+  repo: https://github.com/pablomendez30-hub/Servicios-
+  plan: free
+  region: oregon
+  buildCommand: npm install
+  startCommand: node server.js
+version: "1"
+        // Seleccionar un servicio y redirigir a la cita
+        function seleccionarServicio(id) {
+            servicioSeleccionado = id;
+            mostrarSeccion('cita');
+        }
+
+        // Agregar un nuevo servicio
+        document.getElementById('formAgregarServicio').addEventListener('submit', (e) => {
             e.preventDefault();
-            const usuario_id = document.getElementById('usuario_id').value;
-            const servicio = document.getElementById('servicio').value;
-            const fecha = document.getElementById('fecha').value;
-            const hora = document.getElementById('hora').value;
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const precio = document.getElementById('precio').value;
 
-            fetch('http://localhost:3000/citas', {
+            fetch('https://spa-backend.onrender.com/servicios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario_id, servicio_id: servicio, fecha, hora })
+                body: JSON.stringify({ nombre, descripcion, precio })
             })
             .then(res => res.json())
-            .then(data => alert(data.mensaje));
+            .then(data => {
+                alert(data.mensaje || 'Servicio agregado exitosamente');
+                mostrarSeccion('inicio');
+            })
+            .catch(error => console.error('Error al guardar el servicio:', error));
         });
+
+        // Registrar una cita
+        document.getElementById('formCita').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombreCliente').value;
+            const apellido = document.getElementById('apellidoCliente').value;
+            const telefono = document.getElementById('telefonoCliente').value;
+            const hora = document.getElementById('horaCita').value;
+
+            fetch('https://spa-backend.onrender.com/citas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    servicio_id: servicioSeleccionado,
+                    nombre,
+                    apellido,
+                    telefono,
+                    hora
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.mensaje || 'Cita registrada exitosamente');
+                mostrarSeccion('inicio');
+            })
+            .catch(error => console.error('Error al registrar la cita:', error));
+        });
+
+        // Cargar servicios al inicio
+        cargarServiciosInicio();
+
+        // Scroll automático a la lista de servicios
+        function scrollToServicios() {
+            document.getElementById('serviciosInicio').scrollIntoView({ behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>

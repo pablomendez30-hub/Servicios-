@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Cita</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Solicitar Cita</h1>
+    <form id="formCita">
+        <input type="text" id="nombre" placeholder="Nombre" required />
+        <input type="text" id="apellido" placeholder="Apellido" required />
+        <input type="text" id="telefono" placeholder="Teléfono" required />
+        <input type="datetime-local" id="hora" required />
+        <button type="submit">Solicitar Cita</button>
+    </form>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const servicioId = urlParams.get('servicioId');
+
+        document.getElementById('formCita').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+            const telefono = document.getElementById('telefono').value;
+            const hora = document.getElementById('hora').value;
+
+            fetch('https://spa-backend.onrender.com/citas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    servicio_id: servicioId,
+                    nombre,
+                    apellido,
+                    telefono,
+                    hora 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.mensaje || 'Cita registrada exitosamente');
+                window.location.href = 'listar-servicios.html';
+            })
+            .catch(error => console.error('Error al registrar la cita:', error));
+        });
+    </script>
+</body>
+</html>

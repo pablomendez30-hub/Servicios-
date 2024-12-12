@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Servicios</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Agregar Servicios</h1>
+    <form id="formAgregarServicio">
+        <input type="text" id="nombre" placeholder="Nombre del servicio" required />
+        <textarea id="descripcion" placeholder="Descripción del servicio" required></textarea>
+        <input type="number" id="precio" placeholder="Precio" required />
+        <button type="submit">Guardar Servicio</button>
+    </form>
+    <script>
+        document.getElementById('formAgregarServicio').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const precio = document.getElementById('precio').value;
+
+            fetch('https://spa-backend.onrender.com/servicios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, descripcion, precio })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.mensaje || 'Servicio agregado exitosamente');
+                document.getElementById('formAgregarServicio').reset();
+            })
+            .catch(error => console.error('Error al guardar el servicio:', error));
+        });
+    </script>
+</body>
+</html>

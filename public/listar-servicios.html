@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listar Servicios</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Servicios Disponibles</h1>
+    <ul id="listaServicios"></ul>
+    <script>
+        // Cargar servicios desde el backend
+        fetch('https://spa-backend.onrender.com/servicios')
+            .then(res => res.json())
+            .then(data => {
+                const lista = document.getElementById('listaServicios');
+                data.forEach(servicio => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        ${servicio.nombre} - $${servicio.precio}
+                        <button onclick="irASolicitarCita(${servicio.id})">Solicitar Cita</button>
+                    `;
+                    lista.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error al cargar los servicios:', error));
+
+        // Función para redirigir a la página de solicitar cita
+        function irASolicitarCita(id) {
+            window.location.href = `solicitar-cita.html?servicioId=${id}`;
+        }
+    </script>
+</body>
+</html>
